@@ -62,7 +62,6 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
-import android.view.Surface;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -331,6 +330,7 @@ public final class VdmService extends Hilt_VdmService {
 
         mKeyguardManager = getSystemService(KeyguardManager.class);
         mDisplayManager = getSystemService(DisplayManager.class);
+
         Objects.requireNonNull(mDisplayManager).registerDisplayListener(mDisplayListener, null);
 
         mPreferenceController.addPreferenceObserver(this, mPreferenceObservers);
@@ -393,7 +393,7 @@ public final class VdmService extends Hilt_VdmService {
             createRemoteDisplay(this, event.getDisplayId(),
                     event.getDisplayCapabilities().getViewportWidth(),
                     event.getDisplayCapabilities().getViewportHeight(),
-                    event.getDisplayCapabilities().getDensityDpi(), null, mRemoteIo);
+                    event.getDisplayCapabilities().getDensityDpi(), mRemoteIo);
         } else if (event.hasStopStreaming() && !event.getStopStreaming().getPause()) {
             closeRemoteDisplay(event.getDisplayId());
         } else if (event.hasDisplayChangeEvent() && event.getDisplayChangeEvent().getFocused()) {
@@ -615,12 +615,11 @@ public final class VdmService extends Hilt_VdmService {
 
             if (mDeviceCapabilities.getSensorCapabilitiesCount() > 0) {
                 mRemoteSensorManager = new RemoteSensorManager(mRemoteIo);
-                virtualDeviceBuilder
-                        .setDevicePolicy(POLICY_TYPE_SENSORS, DEVICE_POLICY_CUSTOM)
-                        .setVirtualSensorCallback(
-                                MoreExecutors.directExecutor(),
-                                mRemoteSensorManager.getVirtualSensorCallback());
+                virtualDeviceBuilder.setVirtualSensorCallback(
+                        MoreExecutors.directExecutor(),
+                        mRemoteSensorManager.getVirtualSensorCallback());
             }
+            virtualDeviceBuilder.setDevicePolicy(POLICY_TYPE_SENSORS, DEVICE_POLICY_CUSTOM);
         }
 
         if (mPreferenceController.getBoolean(R.string.pref_enable_client_camera)) {
@@ -653,7 +652,9 @@ public final class VdmService extends Hilt_VdmService {
                 mRemoteCameraManager.close();
             }
             mRemoteCameraManager = new RemoteCameraManager(mVirtualDevice, mRemoteIo);
-            mRemoteCameraManager.createCameras(mDeviceCapabilities.getCameraCapabilitiesList());
+            mRemoteCameraManager.createCameras(mDeviceCapabilities.getCameraCapabilitiesList(),
+                    mPreferenceController.getBoolean(R.string.pref_duplicate_front_camera),
+                    mPreferenceController.getBoolean(R.string.pref_duplicate_back_camera));
         }
 
         handleAudioCapabilities();
@@ -735,25 +736,20 @@ public final class VdmService extends Hilt_VdmService {
     }
 
     RemoteDisplay createRemoteDisplay(
-            Context context, int displayId, int width, int height, int dpi, Surface surface,
+            Context context, int remoteDisplayId, int width, int height, int dpi,
             RemoteIo remoteIo) {
-        Optional<RemoteDisplay> existingDisplay =
-                mDisplayRepository.getDisplayByRemoteId(displayId);
-        if (existingDisplay.isPresent()) {
-            existingDisplay.get().setSurface(surface);
-            existingDisplay.get().reset(width, height, dpi);
-            return existingDisplay.get();
-        }
-
-        RemoteDisplay remoteDisplay = new RemoteDisplay(context, displayId, width, height, dpi,
-                mVirtualDevice, surface, remoteIo, mPendingDisplayType, mPreferenceController);
-        remoteDisplay.setSurface(surface);
+        RemoteDisplay remoteDisplay = new RemoteDisplay(context, remoteDisplayId, width, height,
+                dpi, mVirtualDevice, remoteIo, mPendingDisplayType, mPreferenceController);
         mDisplayRepository.addDisplay(remoteDisplay);
         if (mPendingRemoteIntent != null) {
             remoteDisplay.launchIntent(mPendingRemoteIntent);
             mPendingRemoteIntent = null;
         }
         return remoteDisplay;
+    }
+
+    Optional<RemoteDisplay> getRemoteDisplay(int remoteDisplayId) {
+        return mDisplayRepository.getDisplayByRemoteId(remoteDisplayId);
     }
 
     void closeRemoteDisplay(int remoteDisplayId) {
@@ -824,6 +820,8 @@ public final class VdmService extends Hilt_VdmService {
         observers.put(R.string.pref_enable_custom_home, v -> recreateVirtualDevice());
         observers.put(R.string.pref_display_timeout, v -> recreateVirtualDevice());
         observers.put(R.string.pref_enable_display_category, v -> recreateVirtualDevice());
+        observers.put(R.string.pref_duplicate_front_camera, v -> recreateVirtualDevice());
+        observers.put(R.string.pref_duplicate_back_camera, v -> recreateVirtualDevice());
         observers.put(R.string.pref_network_channel, s -> {
             if (!mPreferenceController.getBoolean(R.string.pref_standalone_host_demo)) {
                 mConnectionManager.disconnect();
