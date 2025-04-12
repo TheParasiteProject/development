@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {ComponentFixture} from '@angular/core/testing';
 import {assertDefined, assertTrue} from 'common/assert_utils';
 import {TimestampConverterUtils} from 'common/time/test_utils';
 import {TimestampConverter} from 'common/time/timestamp_converter';
@@ -299,49 +298,6 @@ class UnitTestUtils {
     return parser.getEntry(index);
   }
 
-  static checkSectionCollapseAndExpand<T>(
-    htmlElement: HTMLElement,
-    fixture: ComponentFixture<T>,
-    selector: string,
-    sectionTitle: string,
-  ) {
-    const section = assertDefined(htmlElement.querySelector(selector));
-    expect(
-      assertDefined(
-        section.querySelector<HTMLElement>(
-          'collapsible-section-title .mat-title',
-        ),
-      ).textContent,
-    ).toEqual(sectionTitle);
-    const collapseButton = assertDefined(
-      section.querySelector<HTMLElement>('collapsible-section-title button'),
-    );
-    collapseButton.click();
-    fixture.detectChanges();
-    expect(section.classList).toContain('collapsed');
-    const collapsedSections = assertDefined(
-      htmlElement.querySelector('collapsed-sections'),
-    );
-    const collapsedSection = assertDefined(
-      collapsedSections.querySelector('.collapsed-section'),
-    ) as HTMLElement;
-    expect(collapsedSection.textContent?.trim()).toEqual(
-      sectionTitle + '  arrow_right',
-    );
-    collapsedSection.click();
-    fixture.detectChanges();
-    UnitTestUtils.checkNoCollapsedSectionButtons(htmlElement);
-  }
-
-  static checkNoCollapsedSectionButtons(htmlElement: HTMLElement) {
-    const collapsedSections = assertDefined(
-      htmlElement.querySelector('collapsed-sections'),
-    );
-    expect(
-      collapsedSections.querySelectorAll('.collapsed-section').length,
-    ).toEqual(0);
-  }
-
   static makeEmptyTrace<T extends TraceType>(
     traceType: T,
     descriptors: string[] = [],
@@ -352,26 +308,6 @@ class UnitTestUtils {
       .setDescriptors(descriptors)
       .setType(traceType)
       .build();
-  }
-
-  static async checkTooltips<T>(
-    elements: Element[],
-    expTooltips: Array<string | undefined>,
-    fixture: ComponentFixture<T>,
-  ) {
-    for (const [index, el] of elements.entries()) {
-      el.dispatchEvent(new Event('mouseenter'));
-      fixture.detectChanges();
-      const panel = document.querySelector<HTMLElement>('.mat-tooltip-panel');
-      if (expTooltips[index] !== undefined) {
-        expect(panel?.textContent).toEqual(expTooltips[index]);
-      } else {
-        expect(panel).toBeNull();
-      }
-      el.dispatchEvent(new Event('mouseleave'));
-      fixture.detectChanges();
-      await fixture.whenStable();
-    }
   }
 
   static makeFakeWebSocket(): jasmine.SpyObj<WebSocket> {
