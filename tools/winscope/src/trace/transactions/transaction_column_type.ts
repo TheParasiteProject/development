@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-import {PropertyTreeNode} from 'trace/tree_node/property_tree_node';
-import {AbsoluteEntryIndex} from './index_types';
-
-export interface Transition {
-  id: number;
-  type: string;
-  sendTime?: PropertyTreeNode;
-  dispatchTime?: PropertyTreeNode;
-  duration?: string;
-  merged: boolean;
-  aborted: boolean;
-  played: boolean;
-  propertiesTree: PropertyTreeNode;
-  traceIndex: AbsoluteEntryIndex;
+export enum TransactionColumnType {
+  TRANSACTION_ID,
+  VSYNC_ID,
+  PID,
+  UID,
+  PROCESS,
+  TRANSACTION_TYPE,
+  LAYER_OR_DISPLAY_ID,
+  FLAGS,
 }
