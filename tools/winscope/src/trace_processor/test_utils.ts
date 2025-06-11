@@ -75,3 +75,14 @@ export function setNumRowsSpyQueryResult(
   spy.numRows.and.returnValue(rows);
   return spy;
 }
+
+export function makeSpyRowIterator(): jasmine.SpyObj<RowIterator> {
+  const iter = jasmine.createSpyObj<RowIterator>('row', [
+    'get',
+    'valid',
+    'next',
+  ]);
+  iter.valid.and.returnValue(true);
+  iter.next.and.callFake(() => iter.valid.and.returnValue(false));
+  return iter;
+}
