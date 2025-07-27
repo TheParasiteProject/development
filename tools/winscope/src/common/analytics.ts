@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-// organize-imports-ignore
-import 'app/global_init';
 import {globalConfig} from 'common/global_config';
-globalConfig.set({
-  MODE: 'DEV',
-});
 
-import {bootstrapApplication} from '@angular/platform-browser';
-import {AppComponent} from 'app/components/app_component';
-
-bootstrapApplication(AppComponent).catch((e) => console.error(e));
+/* eslint-disable no-undef */
+export class Analytics {
+  static analitycsLogEvent(
+    eventName: Gtag.EventNames | (string & {}),
+    eventParams?: Gtag.ControlParams | Gtag.EventParams | Gtag.CustomParams,
+  ) {
+    if (globalConfig.MODE === 'PROD') {
+      gtag('event', eventName, eventParams);
+    }
+  }
+}
