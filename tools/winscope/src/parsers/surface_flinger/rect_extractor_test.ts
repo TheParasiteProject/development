@@ -227,54 +227,140 @@ describe('SurfaceFlinger RectExtractor', () => {
     });
 
     it('skips display with null id', () => {
-      setColumnValuesForDisplayRect();
-      snapshotIter.get.withArgs('display_id').and.returnValue(null);
+      snapshotIteratorMock([{'display_id': null, 'id': 1n}]);
       checkDisplaysExtracted([]);
     });
 
     it('extracts display rect with isActiveDisplay not set', () => {
-      setColumnValuesForDisplayRect();
+      snapshotIteratorMock([defaultDisplayRow()]);
       const expectedRect = makeExpectedDisplayRect();
       checkDisplaysExtracted([expectedRect]);
     });
 
     it('extracts display rect with isActiveDisplay set', () => {
-      setColumnValuesForDisplayRect();
-      snapshotIter.get.withArgs('is_on').and.returnValue(1n);
+      snapshotIteratorMock([defaultDisplayRow({'is_on': true})]);
       const expectedRect = makeExpectedDisplayRect(undefined, true);
       checkDisplaysExtracted([expectedRect]);
     });
 
     it('extracts display rect with unknown name', () => {
-      setColumnValuesForDisplayRect();
-      snapshotIter.get.withArgs('display_name').and.returnValue(null);
+      snapshotIteratorMock([defaultDisplayRow({'display_name': null})]);
       const expectedRect = makeExpectedDisplayRect('Unknown Display');
       checkDisplaysExtracted([expectedRect]);
     });
 
-    function setColumnValuesForDisplayRect() {
-      snapshotIter.get.withArgs('display_id').and.returnValue(123n);
-      snapshotIter.get.withArgs('display_name').and.returnValue('Display 123');
-      snapshotIter.get.withArgs('is_on').and.returnValue(0n);
-      snapshotIter.get.withArgs('is_virtual').and.returnValue(0n);
-      snapshotIter.get.withArgs('x').and.returnValue(0);
-      snapshotIter.get.withArgs('y').and.returnValue(0);
-      snapshotIter.get.withArgs('w').and.returnValue(1000);
-      snapshotIter.get.withArgs('h').and.returnValue(2000);
-      snapshotIter.get.withArgs('group_id').and.returnValue(321n);
-      snapshotIter.get.withArgs('depth').and.returnValue(1n);
+    it('extracts 2 displays for same snapshot id', () => {
+      const display1Values = defaultDisplayRow();
+      const display2Values = {
+        'display_id': 456n,
+        'display_name': 'Display 456',
+        'is_on': 1n,
+        'is_virtual': 0n,
+        'x': 1000,
+        'y': 0,
+        'w': 800,
+        'h': 1800,
+        'group_id': 654n,
+        'depth': 2n,
+        'id': 1n,
+      };
+      snapshotIteratorMock([display1Values, display2Values]);
+
+      const expectedRect1 = makeExpectedDisplayRect('Display 123', false);
+      const expectedRect2 = new TraceRectBuilder()
+        .setX(1000)
+        .setY(0)
+        .setWidth(800)
+        .setHeight(1800)
+        .setId('Display - 456')
+        .setName('Display 456')
+        .setTransform(IDENTITY_MATRIX)
+        .setGroupId(654)
+        .setIsVisible(false)
+        .setIsDisplay(true)
+        .setIsActiveDisplay(true)
+        .setDepth(2)
+        .setIsSpy(false)
+        .build();
+
+      checkDisplaysExtracted([expectedRect1, expectedRect2]);
+    });
+
+    it('stops processing when snapshotId changes', () => {
+      snapshotIteratorMock([
+        defaultDisplayRow({
+          'id': 1n,
+          'display_id': 111n,
+          'display_name': 'Display 111',
+        }),
+        defaultDisplayRow({
+          'id': 1n,
+          'display_id': 222n,
+          'display_name': 'Display 222',
+        }),
+        defaultDisplayRow({
+          'id': 2n,
+          'display_id': 333n,
+          'display_name': 'Display 333',
+        }),
+      ]);
+      const expectedRect1 = makeExpectedDisplayRect('Display 111', false, 111n);
+      const expectedRect2 = makeExpectedDisplayRect('Display 222', false, 222n);
+      checkDisplaysExtracted([expectedRect1, expectedRect2]);
+    });
+
+    it('handles no rows matching targetSnapshotId', () => {
+      snapshotIteratorMock([
+        defaultDisplayRow({'id': 2n}),
+        defaultDisplayRow({'id': 3n}),
+      ]);
+      checkDisplaysExtracted([]);
+    });
+
+    function snapshotIteratorMock(rows: Array<{[key: string]: any}>) {
+      let currentRow = 0;
+      snapshotIter.valid.and.callFake(() => currentRow < rows.length);
+      snapshotIter.next.and.callFake(() => {
+        currentRow++;
+      });
+      snapshotIter.get.and.callFake((key: string) => {
+        if (currentRow >= rows.length) {
+          return undefined;
+        }
+        return rows[currentRow][key];
+      });
+    }
+
+    function defaultDisplayRow(overrides: {[key: string]: any} = {}): {
+      [key: string]: any;
+    } {
+      const defaults = {
+        'display_id': 123n,
+        'display_name': 'Display 123',
+        'is_on': false,
+        'is_virtual': 0n,
+        'x': 0,
+        'y': 0,
+        'w': 1000,
+        'h': 2000,
+        'group_id': 321n,
+        'depth': 1n,
+        'id': 1n,
+      };
+      return {...defaults, ...overrides};
     }
 
     function makeExpectedDisplayRect(
       name = 'Display 123',
       isActive = false,
+      displayId = 123n,
     ): TraceRect {
       return new TraceRectBuilder()
         .setX(0)
         .setY(0)
         .setWidth(1000)
         .setHeight(2000)
-        .setId('Display - 123')
+        .setId(`Display - ${displayId}`)
         .setName(name)
         .setTransform(IDENTITY_MATRIX)
         .setGroupId(321)
@@ -287,8 +373,11 @@ describe('SurfaceFlinger RectExtractor', () => {
     }
 
     function checkDisplaysExtracted(expected: TraceRect[]) {
-      const rects = RectExtractor.extractDisplayRects(snapshotResult);
-      expect(rects).toEqual(expected);
+      const {displayRects} = RectExtractor.extractDisplayRectsForSnapshot(
+        snapshotResult.iter({}),
+        1n,
+      );
+      expect(displayRects).toEqual(expected);
     }
   });
 });
