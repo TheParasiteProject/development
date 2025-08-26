@@ -21,7 +21,7 @@ import {TracePositionUpdate} from 'messaging/winscope_event';
 import {getWindowManagerState} from 'test/unit/fixture_utils';
 import {TraceBuilder} from 'test/unit/trace_builder';
 import {makeEmptyTrace} from 'test/unit/trace_utils';
-import {UiTreeNodeUtils} from 'test/unit/ui_tree_node_utils';
+import {makeUiPropertyNode} from 'test/unit/ui_tree_node_utils';
 import {Trace} from 'trace_api/trace';
 import {TRACE_INFO} from 'trace_api/trace_info';
 import {TraceType} from 'trace_api/trace_type';
@@ -33,7 +33,7 @@ import {VISIBLE_CHIP} from 'viewers/common/chip';
 import {TextFilter} from 'viewers/common/text_filter';
 import {UiHierarchyTreeNode} from 'viewers/common/ui_hierarchy_tree_node';
 import {UiPropertyTreeNode} from 'viewers/common/ui_property_tree_node';
-import {UiTreeUtils} from 'viewers/common/ui_tree_utils';
+import {makeNodeFilter} from 'viewers/common/ui_tree_utils';
 import {ViewerEvents} from 'viewers/common/viewer_events';
 import {TraceRectType} from 'viewers/components/rects/rect_spec';
 import {Presenter} from './presenter';
@@ -148,18 +148,14 @@ the default for its data type.`,
     this.selectedTree = UiHierarchyTreeNode.from(
       assertDefined(
         firstEntryDataTree.findDfs(
-          UiTreeUtils.makeNodeFilter(
-            new TextFilter('93d3f3c').getFilterPredicate(),
-          ),
+          makeNodeFilter(new TextFilter('93d3f3c').getFilterPredicate()),
         ),
       ),
     );
     this.selectedTreeAfterPositionUpdate = UiHierarchyTreeNode.from(
       assertDefined(
         firstEntryDataTree.findDfs(
-          UiTreeUtils.makeNodeFilter(
-            new TextFilter('f7092ed').getFilterPredicate(),
-          ),
+          makeNodeFilter(new TextFilter('f7092ed').getFilterPredicate()),
         ),
       ),
     );
@@ -233,9 +229,7 @@ the default for its data type.`,
   }
 
   override executeSpecializedTests(): void {
-    const invalidNode = UiPropertyTreeNode.from(
-      UiTreeNodeUtils.makeUiPropertyNode('', '', 0),
-    );
+    const invalidNode = UiPropertyTreeNode.from(makeUiPropertyNode('', '', 0));
 
     describe('Specialized tests', () => {
       let presenter: Presenter;
@@ -275,7 +269,7 @@ the default for its data type.`,
 
       it('does not propagate hashcode if matching node not found', async () => {
         const missingHashcode = UiPropertyTreeNode.from(
-          UiTreeNodeUtils.makeUiPropertyNode('', 'hashCode', 0),
+          makeUiPropertyNode('', 'hashCode', 0),
         );
         await presenter.onPropagatePropertyClick(missingHashcode);
         expect(uiData.highlightedItem).toEqual('');
@@ -283,7 +277,7 @@ the default for its data type.`,
 
       it('propagates node with matching hashcode', async () => {
         const validHashcode = UiPropertyTreeNode.from(
-          UiTreeNodeUtils.makeUiPropertyNode('', 'hashCode', 32720206),
+          makeUiPropertyNode('', 'hashCode', 32720206),
         );
         await presenter.onAppEvent(this.getPositionUpdate());
         await presenter.onPropagatePropertyClick(validHashcode);

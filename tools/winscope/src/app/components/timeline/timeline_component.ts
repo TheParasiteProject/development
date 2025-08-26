@@ -52,7 +52,11 @@ import {FunctionUtils} from 'common/function_utils';
 import {PersistentStore} from 'common/store/persistent_store';
 import {parseBigIntStrippingUnit} from 'common/string_utils';
 import {TimeRange, Timestamp, TimestampFormatType} from 'common/time/time';
-import {TimestampUtils} from 'common/time/timestamp_utils';
+import {
+  isNsFormat,
+  isRealTimeOnlyFormat,
+  extractDateFromHumanTimestamp,
+} from 'common/time/timestamp_utils';
 import {Analytics} from 'logging/analytics';
 import {
   ActiveTraceChanged,
@@ -865,9 +869,9 @@ export class TimelineComponent
     const target = event.target as HTMLInputElement;
     let input = target.value;
     // if hh:mm:ss.zz format, append date of current timestamp
-    if (TimestampUtils.isRealTimeOnlyFormat(input)) {
+    if (isRealTimeOnlyFormat(input)) {
       const date = assertDefined(
-        TimestampUtils.extractDateFromHumanTimestamp(
+        extractDateFromHumanTimestamp(
           this.getCurrentTracePosition().timestamp.format(),
         ),
       );
@@ -977,7 +981,7 @@ export class TimelineComponent
         range.containsTimestamp(bookmark),
       );
     }
-    const clickedNs = (range.from.getValueNs() + range.to.getValueNs()) / 2n;
+    const clickedNs = (range.startNs + range.endNs) / 2n;
     if (rangeContainsBookmark) {
       const closestBookmark = this.bookmarks.reduce((prev, curr) => {
         if (clickedNs - curr.getValueNs() < 0) return prev;
@@ -1100,7 +1104,7 @@ export class TimelineComponent
   }
 
   private validateNsFormat(control: FormControl): ValidationErrors | null {
-    const valid = TimestampUtils.isNsFormat(control.value ?? '');
+    const valid = isNsFormat(control.value ?? '');
     return !valid ? {invalidInput: control.value} : null;
   }
 
