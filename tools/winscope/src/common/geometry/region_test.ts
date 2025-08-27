@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,33 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Rect} from './rect';
+import {Region} from './region';
 
-import {mixin} from './function_utils';
+describe('Region', () => {
+  it('should initialize with the correct rects', () => {
+    const rects = [new Rect(0, 0, 10, 10), new Rect(20, 20, 30, 30)];
+    const region = new Region(rects);
+    expect(region.rects).toEqual(rects);
+  });
 
-describe('function_utils', () => {
-  class A {
-    a = 'a';
-    foo(): string {
-      return 'a';
-    }
-  }
-
-  class B {
-    b = 'b';
-    bar(): string {
-      return 'b';
-    }
-  }
-
-  it('mixin()', () => {
-    const a = new A();
-    const b = new B();
-
-    const mixinObj = mixin(a, b);
-
-    expect(mixinObj.a).toEqual('a');
-    expect(mixinObj.b).toEqual('b');
-    expect(mixinObj.foo()).toEqual('a');
-    expect(mixinObj.bar()).toEqual('b');
+  it('createEmpty should create a region with no rects', () => {
+    const region = Region.createEmpty();
+    expect(region.rects).toEqual([]);
   });
 });
