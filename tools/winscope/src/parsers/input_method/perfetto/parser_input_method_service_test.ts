@@ -17,7 +17,7 @@ import {assertDefined} from 'common/assert_utils';
 import {
   TimestampConverterUtils,
   timestampEqualityTester,
-} from 'common/time/test_utils';
+} from 'common/time/time_test_helpers';
 import {getPerfettoParser} from 'test/unit/fixture_utils';
 import {CoarseVersion} from 'trace_api/coarse_version';
 import {Parser} from 'trace_api/parser';
@@ -44,7 +44,7 @@ describe('PerfettoParserInputMethodService', () => {
   });
 
   it('provides timestamps', () => {
-    expect(assertDefined(parser.getTimestamps()).length).toEqual(18);
+    expect(assertDefined(parser.getTimestamps()).length).toBe(18);
 
     const expected = [
       TimestampConverterUtils.makeRealTimestamp(1714659587709640744n),
@@ -57,6 +57,6 @@ describe('PerfettoParserInputMethodService', () => {
   it('retrieves trace entry', async () => {
     const entry = await parser.getEntry(0);
     expect(entry).toBeInstanceOf(HierarchyTreeNode);
-    expect(entry.id).toEqual('InputMethodService entry');
+    expect(entry.id).toBe('InputMethodService entry');
   });
 });

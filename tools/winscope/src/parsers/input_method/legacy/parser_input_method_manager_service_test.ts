@@ -17,7 +17,7 @@ import {assertDefined} from 'common/assert_utils';
 import {
   TimestampConverterUtils,
   timestampEqualityTester,
-} from 'common/time/test_utils';
+} from 'common/time/time_test_helpers';
 import Long from 'long';
 import {LegacyParserProvider} from 'test/unit/fixture_utils';
 import {CoarseVersion} from 'trace_api/coarse_version';
@@ -59,14 +59,14 @@ describe('ParserInputMethodManagerService', () => {
 
     it('converts to valid perfetto packets', async () => {
       const packets = parser.convertToPerfettoPackets!(10);
-      expect(packets.length).toEqual(1);
-      expect(packets[0].trustedPacketSequenceId).toEqual(10);
+      expect(packets.length).toBe(1);
+      expect(packets[0].trustedPacketSequenceId).toBe(10);
       const data =
         packets[0].winscopeExtensions?.[
           '.perfetto.protos.WinscopeExtensionsImpl.inputmethodManagerService'
         ];
       expect(data?.inputMethodManagerService).toBeDefined();
-      expect(data?.where).toEqual(
+      expect(data?.where).toBe(
         'InputMethodManagerService#startInputOrWindowGainedFocus',
       );
       const ts = Long.fromString(BigInt(15963782518).toString());
@@ -88,7 +88,7 @@ describe('ParserInputMethodManagerService', () => {
 
       const entry = await perfettoParser.getEntry(0);
       expect(entry).toBeInstanceOf(HierarchyTreeNode);
-      expect(entry.getEagerPropertyByName('where')?.getValue()).toEqual(
+      expect(entry.getEagerPropertyByName('where')?.getValue()).toBe(
         'InputMethodManagerService#startInputOrWindowGainedFocus',
       );
     });
@@ -121,14 +121,14 @@ describe('ParserInputMethodManagerService', () => {
 
     it('converts to valid perfetto packets', async () => {
       const packets = parser.convertToPerfettoPackets!(10);
-      expect(packets.length).toEqual(3);
-      expect(packets[0].trustedPacketSequenceId).toEqual(10);
+      expect(packets.length).toBe(3);
+      expect(packets[0].trustedPacketSequenceId).toBe(10);
       const data =
         packets[0].winscopeExtensions?.[
           '.perfetto.protos.WinscopeExtensionsImpl.inputmethodManagerService'
         ];
       expect(data?.inputMethodManagerService).toBeDefined();
-      expect(data?.where).toEqual(
+      expect(data?.where).toBe(
         'InputMethodManagerService#startInputOrWindowGainedFocus',
       );
       const ts = Long.fromString(BigInt(1149226290110).toString());

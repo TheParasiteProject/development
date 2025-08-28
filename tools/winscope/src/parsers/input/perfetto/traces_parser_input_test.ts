@@ -18,7 +18,7 @@ import {assertDefined} from 'common/assert_utils';
 import {
   TimestampConverterUtils,
   timestampEqualityTester,
-} from 'common/time/test_utils';
+} from 'common/time/time_test_helpers';
 import {getTracesParser} from 'test/unit/fixture_utils';
 import {TraceBuilder} from 'test/unit/trace_builder';
 import {UserNotifierChecker} from 'test/unit/user_notifier_checker';
@@ -74,7 +74,7 @@ describe('TracesParserInput', () => {
 
   it('retrieves all entries', async () => {
     const entries = await parser.getAllEntries();
-    expect(entries.length).toEqual(8);
+    expect(entries.length).toBe(8);
     expect(entries.every((entry) => entry !== undefined)).toBeTrue();
   });
 
@@ -91,9 +91,9 @@ describe('TracesParserInput', () => {
     expect(motionEvent.getEagerPropertyByName('eventId')?.getValue()).toEqual(
       330184796n,
     );
-    expect(
-      motionEvent.getEagerPropertyByName('type')?.formattedValue(),
-    ).toEqual('MOTION');
+    expect(motionEvent.getEagerPropertyByName('type')?.formattedValue()).toBe(
+      'MOTION',
+    );
   });
 
   it('supports VSYNCID custom query', async () => {

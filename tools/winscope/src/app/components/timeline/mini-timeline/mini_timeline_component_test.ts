@@ -32,7 +32,7 @@ import {
 import {TimelineData} from 'app/timeline_data';
 import {assertDefined} from 'common/assert_utils';
 import {KeyboardEventCode} from 'common/dom_utils';
-import {TimestampConverterUtils} from 'common/time/test_utils';
+import {TimestampConverterUtils} from 'common/time/time_test_helpers';
 import {TimeRange, Timestamp} from 'common/time/time';
 import {DOMTestHelper} from 'test/unit/dom_test_utils';
 import {TracesBuilder} from 'test/unit/traces_builder';
@@ -171,7 +171,7 @@ describe('MiniTimelineComponent', () => {
       'visible',
     );
     const zoomButton = dom.get(resetButtonSelector).getHTMLElement();
-    expect(window.getComputedStyle(zoomButton).visibility).toEqual('visible');
+    expect(window.getComputedStyle(zoomButton).visibility).toBe('visible');
   });
 
   it('shows zoom controls when zoomed in', () => {
@@ -184,7 +184,7 @@ describe('MiniTimelineComponent', () => {
       'visible',
     );
     const zoomButton = dom.get(resetButtonSelector).getHTMLElement();
-    expect(window.getComputedStyle(zoomButton).visibility).toEqual('visible');
+    expect(window.getComputedStyle(zoomButton).visibility).toBe('visible');
   });
 
   it('loads with initial zoom', () => {
@@ -246,7 +246,7 @@ describe('MiniTimelineComponent', () => {
 
     const slider = dom.get('.slider .handle');
     const sliderEl = slider.getHTMLElement();
-    expect(window.getComputedStyle(sliderEl).visibility).toEqual('visible');
+    expect(window.getComputedStyle(sliderEl).visibility).toBe('visible');
 
     slider.dragElement(100, 8);
     const finalZoom = timelineData.getZoomRange();
@@ -344,7 +344,7 @@ describe('MiniTimelineComponent', () => {
 
     openContextMenu(assertDefined(component.miniTimelineComponent));
     const options = getContextMenuItems();
-    expect(options.length).toEqual(2);
+    expect(options.length).toBe(2);
   });
 
   it('adds bookmark', () => {

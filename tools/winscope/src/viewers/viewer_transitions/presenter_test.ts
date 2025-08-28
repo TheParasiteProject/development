@@ -16,7 +16,7 @@
 
 import {assertDefined} from 'common/assert_utils';
 import {InMemoryStorage} from 'common/store/in_memory_storage';
-import {TimestampConverterUtils} from 'common/time/test_utils';
+import {TimestampConverterUtils} from 'common/time/time_test_helpers';
 import {wait} from 'common/time/time_utils';
 import {TracePositionUpdate} from 'messaging/winscope_event';
 import {getPerfettoParser} from 'test/unit/fixture_utils';
@@ -171,18 +171,18 @@ class PresenterTransitionsTest extends AbstractLogViewerPresenterTest<UiData> {
   }
 
   override executePropertiesChecksAfterPositionUpdate(uiData: UiDataLog) {
-    expect(uiData.entries.length).toEqual(4);
+    expect(uiData.entries.length).toBe(4);
 
     const selectedTransition = assertDefined(uiData.propertiesTree);
-    expect(selectedTransition.getChildByName('id')?.formattedValue()).toEqual(
+    expect(selectedTransition.getChildByName('id')?.formattedValue()).toBe(
       '32',
     );
-    expect(selectedTransition.getChildByName('type')?.formattedValue()).toEqual(
+    expect(selectedTransition.getChildByName('type')?.formattedValue()).toBe(
       'OPEN',
     );
     expect(
       selectedTransition.getChildByName('createTimeNs')?.formattedValue(),
-    ).toEqual('2023-11-21, 13:30:25.429');
+    ).toBe('2023-11-21, 13:30:25.429');
 
     const dispatchTimeEntryTs = uiData.entries[0].fields[3];
     expect(dispatchTimeEntryTs?.propagateEntryTimestamp).toBeTrue();

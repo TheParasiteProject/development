@@ -19,7 +19,7 @@ import {
   getTimestampConverter,
   TimestampConverterUtils,
   timestampEqualityTester,
-} from 'common/time/test_utils';
+} from 'common/time/time_test_helpers';
 import Long from 'long';
 import {perfetto} from 'protos/perfetto/trace/static';
 import {LegacyParserProvider} from 'test/unit/fixture_utils';
@@ -80,15 +80,15 @@ describe('ParserSurfaceFlingerDump', () => {
 
     it('converts to valid perfetto packets', async () => {
       const packets = parser.convertToPerfettoPackets!(10);
-      expect(packets.length).toEqual(1);
+      expect(packets.length).toBe(1);
       expect(packets[0].timestamp).toEqual(Long.fromInt(0));
       expect(packets[0].timestampClockId).toEqual(
         perfetto.protos.ClockSnapshot.Clock.BuiltinClocks.MONOTONIC,
       );
-      expect(packets[0].trustedPacketSequenceId).toEqual(10);
+      expect(packets[0].trustedPacketSequenceId).toBe(10);
       expect(
         packets[0].surfaceflingerLayersSnapshot?.layers?.layers?.length,
-      ).toEqual(94);
+      ).toBe(94);
     });
 
     it('converts to valid perfetto trace', async () => {
@@ -123,15 +123,15 @@ describe('ParserSurfaceFlingerDump', () => {
 
     it('converts to valid perfetto packets', async () => {
       const packets = parser.convertToPerfettoPackets!(10);
-      expect(packets.length).toEqual(1);
+      expect(packets.length).toBe(1);
       expect(packets[0].timestamp).toEqual(Long.fromInt(0));
       expect(packets[0].timestampClockId).toEqual(
         perfetto.protos.ClockSnapshot.Clock.BuiltinClocks.MONOTONIC,
       );
-      expect(packets[0].trustedPacketSequenceId).toEqual(10);
+      expect(packets[0].trustedPacketSequenceId).toBe(10);
       expect(
         packets[0].surfaceflingerLayersSnapshot?.layers?.layers?.length,
-      ).toEqual(91);
+      ).toBe(91);
     });
 
     it('does not provide entry', () => {

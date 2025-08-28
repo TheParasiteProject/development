@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {TimestampConverterUtils} from 'common/time/test_utils';
+import {TimestampConverterUtils} from 'common/time/time_test_helpers';
 import {TimeRange} from 'common/time/time';
 import {HierarchyTreeBuilder} from 'test/unit/hierarchy_tree_builder';
 import {TransitionStatus} from 'trace/transitions/status';
@@ -208,7 +208,7 @@ describe('TimelineUtils', () => {
     });
 
     it('robust to invalid hex string', () => {
-      expect(convertHexToRgb('#1')).toEqual(undefined);
+      expect(convertHexToRgb('#1')).toBeUndefined();
     });
   });
 

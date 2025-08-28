@@ -18,7 +18,7 @@ import {assertDefined} from 'common/assert_utils';
 import {
   TimestampConverterUtils,
   timestampEqualityTester,
-} from 'common/time/test_utils';
+} from 'common/time/time_test_helpers';
 import {LegacyParserProvider} from 'test/unit/fixture_utils';
 import {PropertyTreeBuilder} from 'test/unit/property_tree_builder';
 import {CoarseVersion} from 'trace_api/coarse_version';
@@ -49,7 +49,7 @@ describe('ParserEventLog', () => {
     it('has expected timestamps', () => {
       const timestamps = assertDefined(parser.getTimestamps());
 
-      expect(timestamps.length).toEqual(184);
+      expect(timestamps.length).toBe(184);
 
       const expected = [
         TimestampConverterUtils.makeRealTimestamp(1681207047981157174n),
@@ -98,7 +98,7 @@ describe('ParserEventLog', () => {
     it('sorts entries to make timestamps monotonically increasing', () => {
       const timestamps = assertDefined(parser.getTimestamps());
 
-      expect(timestamps.length).toEqual(3);
+      expect(timestamps.length).toBe(3);
 
       const expected = [
         TimestampConverterUtils.makeRealTimestamp(1681207047981157174n),

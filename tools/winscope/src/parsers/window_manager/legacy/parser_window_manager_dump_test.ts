@@ -18,7 +18,7 @@ import {
   getTimestampConverter,
   TimestampConverterUtils,
   timestampEqualityTester,
-} from 'common/time/test_utils';
+} from 'common/time/time_test_helpers';
 import {LegacyParserProvider} from 'test/unit/fixture_utils';
 import {TraceBuilder} from 'test/unit/trace_builder';
 import {CoarseVersion} from 'trace_api/coarse_version';
@@ -73,7 +73,7 @@ describe('ParserWindowManagerDump', () => {
   it('retrieves trace entry', async () => {
     const entry = await parser.getEntry(0);
     expect(entry).toBeInstanceOf(HierarchyTreeNode);
-    expect(entry.getEagerPropertyByName('focusedApp')?.getValue()).toEqual(
+    expect(entry.getEagerPropertyByName('focusedApp')?.getValue()).toBe(
       'com.google.android.apps.nexuslauncher/.NexusLauncherActivity',
     );
   });
@@ -82,7 +82,7 @@ describe('ParserWindowManagerDump', () => {
     const tokenAndTitles = await trace.customQuery(
       CustomQueryType.WM_WINDOWS_TOKEN_AND_TITLE,
     );
-    expect(tokenAndTitles.length).toEqual(73);
+    expect(tokenAndTitles.length).toBe(73);
     expect(tokenAndTitles).toContain({token: 'cab97a6', title: 'Leaf:36:36'});
   });
 });

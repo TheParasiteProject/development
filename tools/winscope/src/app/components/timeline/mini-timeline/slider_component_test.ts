@@ -29,7 +29,7 @@ import {
   NoopAnimationsModule,
 } from '@angular/platform-browser/animations';
 import {assertDefined} from 'common/assert_utils';
-import {TimestampConverterUtils} from 'common/time/test_utils';
+import {TimestampConverterUtils} from 'common/time/time_test_helpers';
 import {TimeRange} from 'common/time/time';
 import {DOMTestHelper} from 'test/unit/dom_test_utils';
 import {TracePosition} from 'trace_api/trace_position';
@@ -133,7 +133,7 @@ describe('SliderComponent', () => {
 
     const box = assertDefined(component.sliderBox);
     spyOnProperty(box.nativeElement, 'offsetWidth', 'get').and.returnValue(100);
-    expect(box.nativeElement.offsetWidth).toEqual(100);
+    expect(box.nativeElement.offsetWidth).toBe(100);
 
     slider.style.width = '587px';
     window.dispatchEvent(new Event('resize'));
@@ -353,6 +353,6 @@ describe('SliderComponent', () => {
   });
 
   function checkVisible(element: HTMLElement) {
-    expect(window.getComputedStyle(element).visibility).toEqual('visible');
+    expect(window.getComputedStyle(element).visibility).toBe('visible');
   }
 });

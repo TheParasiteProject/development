@@ -49,7 +49,7 @@ import {
 import {assertDefined} from 'common/assert_utils';
 import {Download} from 'common/download';
 import {DOWNLOAD_FILENAME_REGEX} from 'common/file_utils';
-import {TimestampConverterUtils} from 'common/time/test_utils';
+import {TimestampConverterUtils} from 'common/time/time_test_helpers';
 import {
   FailedToInitializeTimelineData,
   NoValidFiles,
@@ -162,7 +162,7 @@ describe('AppComponent', () => {
   });
 
   it('has the expected title', () => {
-    expect(component.title).toEqual('winscope');
+    expect(component.title).toBe('winscope');
   });
 
   it('shows permanent header items on homepage', () => {
@@ -454,7 +454,7 @@ describe('AppComponent', () => {
 
     const mediatorSpy = spyOn(component.mediator, 'onWinscopeEvent');
     const actions = dialog.findAll('.warning-action-buttons button');
-    expect(actions.length).toEqual(1);
+    expect(actions.length).toBe(1);
     actions[0].click();
     await dom.whenStable();
     expect(eventHandled).toBeTrue();
@@ -502,7 +502,9 @@ describe('AppComponent', () => {
       getReportedParentOriginSpy.and.returnValue(parentOrigin);
       isSupportedParentOriginSpy.and.returnValue(true);
       dom.detectChanges();
-      const postMessageSpy = spyOn(window.parent, 'postMessage');
+      const postMessageSpy: jasmine.Spy<
+        (message: any, targetOrigin: string, transfer?: Transferable[]) => void
+      > = spyOn(window.parent, 'postMessage');
       dom.findAndClick('.iframe-settings');
       expect(postMessageSpy).toHaveBeenCalledOnceWith(
         {winscopeAction: 'openSettings'},
