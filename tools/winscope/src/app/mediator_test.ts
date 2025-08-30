@@ -17,7 +17,6 @@
 import {assertDefined} from 'common/assert_utils';
 import {mixin} from 'common/function_utils';
 import {InMemoryStorage} from 'common/store/in_memory_storage';
-import {TimestampConverterUtils} from 'common/time/time_test_helpers';
 import {TimezoneInfo} from 'common/time/time';
 import {TimestampConverter} from 'common/time/timestamp_converter';
 import {CrossToolProtocol} from 'cross_tool/cross_tool_protocol';
@@ -65,6 +64,8 @@ import {
   ViewersUnloaded,
   WinscopeEvent,
   WinscopeEventType,
+  PlaybackStart,
+  PlaybackPause,
 } from 'messaging/winscope_event';
 
 import {WinscopeEventEmitter} from 'messaging/winscope_event_emitter';
@@ -72,6 +73,10 @@ import {WinscopeEventEmitterStub} from 'messaging/winscope_event_emitter_stub';
 import {WinscopeEventListener} from 'messaging/winscope_event_listener';
 import {WinscopeEventListenerStub} from 'messaging/winscope_event_listener_stub';
 import {getFixtureFile} from 'test/unit/fixture_file_utils';
+import {
+  makeRealTimestamp,
+  makeZeroTimestamp,
+} from 'test/unit/time_test_helpers';
 import {TraceBuilder} from 'test/unit/trace_builder';
 import {UserNotifierChecker} from 'test/unit/user_notifier_checker';
 import {Trace} from 'trace_api/trace';
@@ -87,8 +92,8 @@ import {TracePipeline} from './trace_pipeline';
 import {TraceSearchInitializer} from './trace_search/trace_search_initializer';
 
 describe('Mediator', () => {
-  const TIMESTAMP_10 = TimestampConverterUtils.makeRealTimestamp(10n);
-  const TIMESTAMP_11 = TimestampConverterUtils.makeRealTimestamp(11n);
+  const TIMESTAMP_10 = makeRealTimestamp(10n);
+  const TIMESTAMP_11 = makeRealTimestamp(11n);
 
   const POSITION_10 = TracePosition.fromTimestamp(TIMESTAMP_10);
   const POSITION_11 = TracePosition.fromTimestamp(TIMESTAMP_11);
@@ -103,7 +108,7 @@ describe('Mediator', () => {
     .build();
   const traceDump = new TraceBuilder<HierarchyTreeNode>()
     .setType(TraceType.SURFACE_FLINGER)
-    .setTimestamps([TimestampConverterUtils.makeZeroTimestamp()])
+    .setTimestamps([makeZeroTimestamp()])
     .build();
 
   let inputFiles: File[];
@@ -488,8 +493,7 @@ describe('Mediator', () => {
     // notify position
     resetSpyCalls();
     const finalTimestampNs = timelineData.getFullTimeRange().endNs;
-    const timestamp =
-      TimestampConverterUtils.makeRealTimestamp(finalTimestampNs);
+    const timestamp = makeRealTimestamp(finalTimestampNs);
     const position = TracePosition.fromTimestamp(timestamp);
 
     await mediator.onWinscopeEvent(new TracePositionUpdate(position, true));
@@ -846,6 +850,62 @@ describe('Mediator', () => {
         ),
       }),
     );
+  });
+
+  describe('PlaybackStart event handling', () => {
+    beforeEach(async () => {
+      await loadFiles();
+      await loadTraceView();
+      resetSpyCalls();
+    });
+
+    it('propagates to the visible viewer matching the trace type', async () => {
+      const event = new PlaybackStart(TraceType.SURFACE_FLINGER, 0);
+      await mediator.onWinscopeEvent(event);
+
+      expect(viewerStub0.onWinscopeEvent).toHaveBeenCalledOnceWith(event);
+      expect(viewerStub1.onWinscopeEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not propagate if the matching viewer is not visible', async () => {
+      const event = new PlaybackStart(TraceType.WINDOW_MANAGER, 0);
+      await mediator.onWinscopeEvent(event);
+
+      expect(viewerStub0.onWinscopeEvent).not.toHaveBeenCalled();
+      expect(viewerStub1.onWinscopeEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not propagate if no viewer matches the trace type', async () => {
+      const event = new PlaybackStart(TraceType.PROTO_LOG, 0);
+      await mediator.onWinscopeEvent(event);
+
+      expect(viewerStub0.onWinscopeEvent).not.toHaveBeenCalled();
+      expect(viewerStub1.onWinscopeEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('PlaybackPause event handling', () => {
+    beforeEach(async () => {
+      await loadFiles();
+      await loadTraceView();
+      resetSpyCalls();
+    });
+
+    it('propagates to the viewer matching the trace type', async () => {
+      const event = new PlaybackPause(TraceType.SURFACE_FLINGER);
+      await mediator.onWinscopeEvent(event);
+
+      expect(viewerStub0.onWinscopeEvent).toHaveBeenCalledOnceWith(event);
+      expect(viewerStub1.onWinscopeEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not propagate if no viewer matches the trace type', async () => {
+      const event = new PlaybackPause(TraceType.PROTO_LOG);
+      await mediator.onWinscopeEvent(event);
+
+      expect(viewerStub0.onWinscopeEvent).not.toHaveBeenCalled();
+      expect(viewerStub1.onWinscopeEvent).not.toHaveBeenCalled();
+    });
   });
 
   async function loadFiles(files = inputFiles) {

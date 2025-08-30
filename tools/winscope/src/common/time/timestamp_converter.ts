@@ -93,7 +93,7 @@ const ELAPSED_TIMESTAMP_FORMATTER = new ElapsedTimestampFormatter();
 /**
  * An interface for converting timestamps for parsers.
  */
-export interface ParserTimestampConverter {
+export declare interface ParserTimestampConverter {
   makeTimestampFromRealNs(valueNs: bigint): Timestamp;
   makeTimestampFromMonotonicNs(valueNs: bigint): Timestamp;
   makeTimestampFromBootTimeNs(valueNs: bigint): Timestamp;
@@ -103,7 +103,7 @@ export interface ParserTimestampConverter {
 /**
  * An interface for converting timestamps for UI components.
  */
-export interface ComponentTimestampConverter {
+export declare interface ComponentTimestampConverter {
   makeTimestampFromHuman(timestampHuman: string): Timestamp;
   getUTCOffset(): string;
   makeTimestampFromNs(valueNs: bigint): Timestamp;
@@ -113,7 +113,7 @@ export interface ComponentTimestampConverter {
 /**
  * An interface for converting timestamps for remote tools.
  */
-export interface RemoteToolTimestampConverter {
+export declare interface RemoteToolTimestampConverter {
   makeTimestampFromBootTimeNs(valueNs: bigint): Timestamp;
   makeTimestampFromRealNs(valueNs: bigint): Timestamp;
   tryGetBootTimeNs(timestamp: Timestamp): bigint | undefined;
@@ -139,7 +139,13 @@ export class TimestampConverter
     private timezoneInfo: TimezoneInfo,
     private realToMonotonicTimeOffsetNs?: bigint,
     private realToBootTimeOffsetNs?: bigint,
-  ) {}
+    utcOffset?: Timestamp,
+  ) {
+    if (utcOffset !== undefined) {
+      this.createdTimestampType = TimestampType.REAL;
+      this.initializeUTCOffset(utcOffset);
+    }
+  }
 
   /**
    * Initializes the UTC offset.
