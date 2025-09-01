@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {ArrayBufferBuilder} from 'common/buffer_utils';
-import {DO_NOTHING_ASYNC} from 'common/function_utils';
+import {ArrayBufferBuilder} from 'common/buffer';
 import {binaryEncode} from 'common/string_utils';
 import {
   ProxyTracingErrors,
@@ -98,9 +97,7 @@ describe('WdpDeviceConnection', () => {
     });
 
     it('closes active trace stream onDestroy', async () => {
-      spyOn(AdbWebSocketStream.prototype, 'write').and.callFake(
-        DO_NOTHING_ASYNC,
-      );
+      spyOn(AdbWebSocketStream.prototype, 'write').and.callFake(() => Promise.resolve());
       await connection.startTrace(new TraceTarget('', [], '', '', [], true));
       const closeSpy = spyOn(AdbWebSocketStream.prototype, 'close');
       connection.onDestroy();

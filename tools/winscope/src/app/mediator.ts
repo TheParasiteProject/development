@@ -17,7 +17,7 @@
 import {assertDefined} from 'common/assert_utils';
 import {Store} from 'common/store/store';
 import {Timestamp} from 'common/time/time';
-import {sleepMs} from 'common/time/time_utils';
+import {Timer} from 'common/time/timer';
 import {CrossToolProtocol} from 'cross_tool/cross_tool_protocol';
 import {Analytics} from 'logging/analytics';
 import {ProgressListener} from 'messaging/progress_listener';
@@ -384,7 +384,7 @@ export class Mediator {
       },
     );
 
-    await event.visit(WinscopeEventType.PLAYBACK_START, async (event) => {
+    await event.visit(WinscopeEventType.PLAYBACK_PLAY, async (event) => {
       const viewer = this.findViewerByType(event.traceType);
       if (viewer) {
         const visible = this.isViewerVisible(viewer);
@@ -407,6 +407,16 @@ export class Mediator {
         await viewer.onWinscopeEvent(event);
       }
     });
+
+    await event.visit(
+      WinscopeEventType.PLAYBACK_SPEED_CHANGE,
+      async (event) => {
+        const viewer = this.findViewerByType(event.traceType);
+        if (viewer) {
+          await viewer.onWinscopeEvent(event);
+        }
+      },
+    );
   }
 
   private async loadFiles(files: File[], source: FilesSource) {
@@ -545,6 +555,7 @@ export class Mediator {
 
   private async loadViewers(source: FilesSource, discardLegacyTraces: boolean) {
     const e2eStartTimeMs = Date.now();
+    const timer = new Timer(10, 10);
 
     if (discardLegacyTraces) {
       this.tracePipeline.discardLegacyTraces();
@@ -553,7 +564,7 @@ export class Mediator {
         'Converting legacy traces to perfetto...',
         undefined,
       );
-      await sleepMs(10); // allow the UI to update before making the main thread very busy
+      await timer.sleepMs(); // allow the UI to update before making the main thread very busy
       await this.tracePipeline.convertLegacyTracesToPerfetto();
       this.currentProgressListener?.onOperationFinished(true);
     }
@@ -563,7 +574,7 @@ export class Mediator {
       undefined,
     );
 
-    await sleepMs(10); // allow the UI to update before making the main thread very busy
+    await timer.sleepMs(); // allow the UI to update before making the main thread very busy
 
     this.tracePipeline.filterTracesWithoutVisualization();
     if (this.tracePipeline.getTraces().getSize() === 0) {
@@ -589,7 +600,7 @@ export class Mediator {
 
     // TODO: move this into the ProgressListener
     // allow the UI to update before making the main thread very busy
-    await sleepMs(10);
+    await timer.sleepMs();
 
     try {
       await this.timelineData.initialize(

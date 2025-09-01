@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 import * as JSZip from 'jszip';
-import {equal} from './array_utils';
-import {DO_NOTHING, OnProgressUpdateType} from './function_utils';
+import {equal} from './typed_array';
 
 /**
  * Type definition for a callback function that is called when a file is unzipped.
@@ -24,6 +23,11 @@ import {DO_NOTHING, OnProgressUpdateType} from './function_utils';
  * @param parentArchive The parent archive file, if any.
  */
 export type OnFile = (file: File, parentArchive: File | undefined) => void;
+
+/**
+ * Type of the onProgressUpdate callback function.
+ */
+export type OnProgressUpdateType = (percentage: number) => void;
 
 /**
  * Utility functions for file operations.
@@ -124,7 +128,7 @@ export async function createZipArchive(
  */
 export async function unzipFile(
   file: Blob,
-  onProgressUpdate: OnProgressUpdateType = DO_NOTHING,
+  onProgressUpdate: OnProgressUpdateType = () => {},
 ): Promise<File[]> {
   const unzippedFiles: File[] = [];
   const zip = new JSZip();
