@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-import {removeDirFromFileName} from 'common/io';
-
-export class TraceFile {
-  constructor(
-    public file: File,
-    public parentArchive?: File,
-  ) {}
-
-  getDescriptor(): string {
-    let descriptor = removeDirFromFileName(this.file.name);
-    if (this.parentArchive?.name) {
-      descriptor += ` (${this.parentArchive.name})`;
-    }
-    return descriptor;
-  }
-}
+/**
+ * Fixtures directory used for compatibility between AOSP and google3.
+ *
+ * Necessary because AOSP and google3 have different build systems, library
+ * versions, code location, etc. and we need to be able to run tests in both
+ * environments.
+ *
+ */
+export const FIXTURES_DIR = 'base/src/test/fixtures/';
