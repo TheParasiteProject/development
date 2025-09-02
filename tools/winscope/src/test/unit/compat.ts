@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-import {divideAndRound} from 'common/bigint_math';
-import {TIME_UNIT_TO_NANO} from './time_units';
-
 /**
- * A class representing a time duration.
+ * Fixtures directory used for compatibility between AOSP and google3.
+ *
+ * Necessary because AOSP and google3 have different build systems, library
+ * versions, code location, etc. and we need to be able to run tests in both
+ * environments.
+ *
  */
-export class TimeDuration {
-  constructor(private readonly timeDiffNs: bigint) {}
-  getValueNs(): bigint {
-    return this.timeDiffNs;
-  }
-
-  format(): string {
-    const msString = divideAndRound(
-      this.timeDiffNs,
-      BigInt(TIME_UNIT_TO_NANO.ms),
-    );
-    return msString.toLocaleString() + ' ms';
-  }
-}
+export const FIXTURES_DIR = 'base/src/test/fixtures/';

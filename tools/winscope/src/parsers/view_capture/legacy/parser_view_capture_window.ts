@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {assertDefined} from 'common/assert_utils';
+import {assertDefined} from 'common/assert';
 import {NOT_IMPLEMENTED_ERROR} from 'common/errors';
-import {utf8Encode} from 'common/string_utils';
+import {utf8Encode} from 'common/string_helpers';
 import {Timestamp} from 'common/time/time';
 import {ParserTimestampConverter} from 'common/time/timestamp_converter';
 import Long from 'long';
