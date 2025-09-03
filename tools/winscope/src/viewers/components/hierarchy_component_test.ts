@@ -29,7 +29,7 @@ import {FilterFlag} from 'common/filter_flag';
 import {InMemoryStorage} from 'common/store/in_memory_storage';
 import {PersistentStore} from 'common/store/persistent_store';
 import {DuplicateLayerIds, MissingLayerIds} from 'messaging/user_warnings';
-import {checkTooltips, DOMTestHelper} from 'test/unit/dom_test_utils';
+import {checkTooltips, DOMTestHelper} from 'test/unit/dom_test_helpers';
 import {HierarchyTreeBuilder} from 'test/unit/hierarchy_tree_builder';
 import {TRACE_INFO} from 'trace_api/trace_info';
 import {TraceType} from 'trace_api/trace_type';
@@ -211,7 +211,13 @@ describe('HierarchyComponent', () => {
 
     component.trees = [
       component.trees[0],
-      UiHierarchyTreeNode.from(component.trees[0]),
+      UiHierarchyTreeNode.from(
+        new HierarchyTreeBuilder()
+          .setId('RootNode2')
+          .setName('Root node')
+          .setChildren([{id: 'Child2', name: 'Child node'}])
+          .build(),
+      ),
     ];
     dom.detectChanges();
     const warning1 = new DuplicateLayerIds([123]);

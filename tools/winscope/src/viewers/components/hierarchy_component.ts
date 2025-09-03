@@ -28,7 +28,7 @@ import {MatDividerModule} from '@angular/material/divider';
 import {MatIconModule} from '@angular/material/icon';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {Color} from 'app/colors';
-import {isElementOverflowing, KeyboardEventKey} from 'common/dom_utils';
+import {isElementOverflowing, KeyboardEventKey} from 'common/dom';
 import {InMemoryStorage} from 'common/store/in_memory_storage';
 import {PersistentStore} from 'common/store/persistent_store';
 import {Warning} from 'common/warning';
@@ -88,7 +88,7 @@ import {viewerCardInnerStyle} from './styles/viewer_card.styles';
       </user-options>
       @if (getWarnings().length > 0) {
         <div>
-          @for (warning of getWarnings(); track warning) {
+          @for (warning of getWarnings(); track $index) {
             <span
               class="mat-body-1 warning"
               [matTooltip]="warning.getMessage()"
@@ -108,7 +108,7 @@ import {viewerCardInnerStyle} from './styles/viewer_card.styles';
         <div
           class="pinned-items"
           [style.padding]="getPinnedItemsPadding()">
-          @for (pinnedItem of pinnedItems; track pinnedItem) {
+          @for (pinnedItem of pinnedItems; track pinnedItem.id) {
             <tree-node
               class="node full-opacity"
               [class]="pinnedItem.getDiff()"
@@ -132,7 +132,7 @@ import {viewerCardInnerStyle} from './styles/viewer_card.styles';
     }
     <div class="hierarchy-content tree-wrapper">
       <div class="trees">
-        @for (tree of trees; track trackById($index, tree)) {
+        @for (tree of trees; track tree.id) {
           <tree-view
             class="tree"
             [node]="tree"
